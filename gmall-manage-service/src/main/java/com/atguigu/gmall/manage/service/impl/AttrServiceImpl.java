@@ -23,9 +23,17 @@ public class AttrServiceImpl implements AttrService {
 
     @Override
     public List<PmsBaseAttrInfo> getAttrInfoList(String catalog3Id) {
+        //根据三级分类获取属性
         PmsBaseAttrInfo pmsBaseAttrInfo = new PmsBaseAttrInfo();
         pmsBaseAttrInfo.setCatalog3Id(catalog3Id);
-        return pmsBaseAttrInfoMapper.select(pmsBaseAttrInfo);
+        List<PmsBaseAttrInfo> attrInfos = pmsBaseAttrInfoMapper.select(pmsBaseAttrInfo);
+        //获取每个属性中的属性值
+        for (PmsBaseAttrInfo attrInfo : attrInfos) {
+            PmsBaseAttrValue pmsBaseAttrValue = new PmsBaseAttrValue();
+            pmsBaseAttrValue.setAttrId(attrInfo.getId());
+            attrInfo.setAttrValueList(pmsBaseAttrValueMapper.select(pmsBaseAttrValue));
+        }
+        return attrInfos;
     }
 
     @Override
