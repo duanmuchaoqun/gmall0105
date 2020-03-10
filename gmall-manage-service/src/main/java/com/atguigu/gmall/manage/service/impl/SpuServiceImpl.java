@@ -30,6 +30,11 @@ public class SpuServiceImpl implements SpuService {
     PmsBaseSaleAttrMapper pmsBaseSaleAttrMapper;
 
 
+    /**
+     * 获取spu列表
+     * @param catalog3Id
+     * @return
+     */
     @Override
     public List<PmsProductInfo> supList(String catalog3Id) {
         PmsProductInfo pmsProductInfo = new PmsProductInfo();
@@ -37,11 +42,19 @@ public class SpuServiceImpl implements SpuService {
         return pmsProductInfoMapper.select(pmsProductInfo);
     }
 
+    /**
+     * 获取平台属性
+     * @return
+     */
     @Override
     public List<PmsBaseSaleAttr> baseSaleAttrList() {
         return pmsBaseSaleAttrMapper.selectAll();
     }
 
+    /**
+     * 保存和修改spu信息
+     * @param pmsProductInfo
+     */
     @Override
     @Transactional(rollbackFor = {RuntimeException.class, Error.class})
     public void saveSpuInfo(PmsProductInfo pmsProductInfo) {
@@ -108,11 +121,26 @@ public class SpuServiceImpl implements SpuService {
         return saleAttrs;
     }
 
+    /**
+     *
+     * @param spuId
+     * @return
+     */
     @Override
     public List<PmsProductImage> spuImageList(String spuId) {
         PmsProductImage pmsProductImage = new PmsProductImage();
         pmsProductImage.setProductId(spuId);
         return pmsProductImageMapper.select(pmsProductImage);
+    }
+
+    /**
+     * 获取前台item销售属性
+     * @param productId
+     * @return
+     */
+    @Override
+    public List<PmsProductSaleAttr> spuSaleAttrListCheckBySku(String productId,String skuId) {
+        return pmsProductSaleAttrMapper.selectSpuSaleAttrListCheckBySku(productId,skuId);
     }
 
 
