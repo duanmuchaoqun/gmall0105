@@ -18,4 +18,21 @@
             <result column="sav_id" property="id"></result>
         </collection>
     </resultMap>
+
+    <select id="selectSkuSaleAttrValueListBySpu" resultMap="selectSkuSaleAttrValueListBySpuMap">
+        SELECT
+            si.id,
+            ssav.sale_attr_value_id
+        FROM
+            pms_sku_info AS si
+        LEFT JOIN pms_sku_sale_attr_value AS ssav ON si.id = ssav.sku_id
+        WHERE
+          si.product_id = #{productId}
+    </select>
+    <resultMap id="selectSkuSaleAttrValueListBySpuMap" type="com.atguigu.gmall.bean.PmsSkuInfo" autoMapping="true">
+        <result column="id" property="id"></result>
+        <collection property="skuSaleAttrValueList" ofType="com.atguigu.gmall.bean.PmsSkuSaleAttrValue" autoMapping="true">
+            <result column="sale_attr_value_id" property="sale_attr_value_id"></result>
+        </collection>
+    </resultMap>
 </mapper>

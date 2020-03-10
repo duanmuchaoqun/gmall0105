@@ -1,6 +1,8 @@
 package com.atguigu.gmall.manage.service.impl;
 
 import com.alibaba.dubbo.config.annotation.Service;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.atguigu.gmall.bean.PmsSkuAttrValue;
 import com.atguigu.gmall.bean.PmsSkuImage;
 import com.atguigu.gmall.bean.PmsSkuInfo;
@@ -10,11 +12,14 @@ import com.atguigu.gmall.manage.mapper.PmsSkuImageMapper;
 import com.atguigu.gmall.manage.mapper.PmsSkuInfoMapper;
 import com.atguigu.gmall.manage.mapper.PmsSkuSaleAttrValueMapper;
 import com.atguigu.gmall.service.SkuService;
+import com.atguigu.gmall.util.RedisUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
+import redis.clients.jedis.Jedis;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class SkuServiceImpl implements SkuService {
@@ -30,6 +35,9 @@ public class SkuServiceImpl implements SkuService {
 
     @Autowired
     PmsSkuSaleAttrValueMapper pmsSkuSaleAttrValueMapper;
+
+    @Autowired
+    RedisUtil redisUtil;
 
 
     @Override
@@ -78,7 +86,7 @@ public class SkuServiceImpl implements SkuService {
      * @return
      */
     @Override
-    public PmsSkuInfo getSkuById(String skuId) {
+    public PmsSkuInfo getSkuByIdFromDb(String skuId) {
         // sku商品对象
         PmsSkuInfo pmsSkuInfo = new PmsSkuInfo();
         pmsSkuInfo.setId(skuId);
@@ -89,5 +97,69 @@ public class SkuServiceImpl implements SkuService {
         pmsSkuImage.setSkuId(skuId);
         skuInfo.setSkuImageList(pmsSkuImageMapper.select(pmsSkuImage));
         return skuInfo;
+    }
+
+
+
+    /**
+     * 通过id获取SKU详情信息
+     * @param skuId
+     * @return
+     */
+    @Override
+    public PmsSkuInfo getSkuById(String skuId) {
+        PmsSkuInfo pmsSkuInfo = new PmsSkuInfo();
+        Jedis jedis = redisUtil.getJedis();
+        String skuKey = "sku:"+skuId+":info";
+        String skuJson = jedis.get(skuKey);
+        // 不为空的话就解析缓存数据
+        if(StringUtils.isNotBlank(skuJson)){
+            pmsSkuInfo = JSON.parseObject(skuJson, PmsSkuInfo.class);
+        } else {
+            //如果缓存里面没有则查询mysql
+
+            //设置分布式锁
+            String token = UUID.randomUUID().toString();
+            String OK = jedis.set("sku:" + skuId + ":lock", token, "nx", "px", 10*1000);//拿到锁的线程有10秒的过期时间
+            if (StringUtils.isNotBlank(OK) && OK.equals("OK")){
+                //设置成功，有权在10秒的国企时间内访问数据库
+                pmsSkuInfo = getSkuByIdFromDb(skuId);
+
+                if(pmsSkuInfo!=null){
+
+                    // 将mysql的查询结果存入redis
+                    jedis.set(skuKey,JSON.toJSONString(pmsSkuInfo));
+                } else {
+                    //数据库不存在该sku
+                    //为了防止缓存穿透，null值设置给redis
+                    jedis.setex(skuKey,60*3,JSON.toJSONString(""));
+                }
+
+                //在访问mysql后，将mysql的分布式锁释放
+                String lockToken = jedis.get("sku:" + skuId + ":lock");
+                if(StringUtils.isNotBlank(lockToken) && lockToken.equals(token)){
+                    // jrfid.eval("lua");可以用lua脚本,在查询到key的同时删除该key，防止高并发下的意外发生
+                    jedis.del("sku:" + skuId + ":lock");//用token确认删除的是自己的sku的锁
+                }
+            }else{
+                //设置失败,自旋（该线程在睡眠几秒后，重新尝试访问本方法）
+                try {
+                    Thread.sleep(3000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                return getSkuById(skuId);
+            }
+
+        }
+        jedis.close();
+
+        return pmsSkuInfo;
+    }
+
+    @Override
+    public List<PmsSkuInfo> getSkuSaleAttrValueListBySpu(String productId) {
+        List<PmsSkuInfo> pmsSkuInfos= pmsSkuInfoMapper.selectSkuSaleAttrValueListBySpu(productId);
+        return pmsSkuInfos;
     }
 }
