@@ -28,6 +28,39 @@ public class CartController {
     @Reference
     CartService cartService;
 
+    @RequestMapping("/checkCart")
+    public String checkCart(Integer isChecked,String skuId,HttpServletRequest request, HttpServletResponse response, ModelMap modelMap){
+        String memberId = "1";
+        OmsCartItem omsCartItem = new OmsCartItem();
+        omsCartItem.setMemberId(memberId);
+        omsCartItem.setProductSkuId(skuId);
+        omsCartItem.setIsChecked(isChecked);
+        //调用服务修改状态
+        cartService.checkCart(omsCartItem);
+        //将新的数据从缓存中查出，渲染给内嵌页
+        List<OmsCartItem> omsCartItems = cartService.cartList(memberId);
+        for (OmsCartItem cartItem : omsCartItems) {
+            BigDecimal quantity = BigDecimal.valueOf(cartItem.getQuantity());
+            cartItem.setTotalPrice(cartItem.getPrice().multiply(quantity));
+        }
+        modelMap.put("cartList",omsCartItems);
+        // 被勾选的商品总额
+        BigDecimal totalAmount = getTotalAmount(omsCartItems);
+        modelMap.put("totalAmount",totalAmount);
+        return "cartListInner";
+    }
+
+    private BigDecimal getTotalAmount(List<OmsCartItem> omsCartItems) {
+        BigDecimal totalAmount = new BigDecimal(0);
+        for (OmsCartItem cartItem : omsCartItems) {
+            if(cartItem.getIsChecked().equals(1)){
+                BigDecimal totalPrice = cartItem.getTotalPrice();
+                totalAmount = totalAmount.add(totalPrice);
+            }
+        }
+        return totalAmount;
+    }
+
     @RequestMapping("/cartList")
     public String cartList(HttpServletRequest request, HttpServletResponse response, ModelMap modelMap){
 

@@ -47,9 +47,10 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public void flushCartCache(String memberId) {
-        OmsCartItem omsCartItem = new OmsCartItem();
-        omsCartItem.setMemberId(memberId);
-        List<OmsCartItem> omsCartItems = omsCartItemMapper.select(omsCartItem);
+        Example example = new Example(OmsCartItem.class);
+        example.orderBy("id").desc();
+        example.createCriteria().andEqualTo("memberId",memberId);
+        List<OmsCartItem> omsCartItems = omsCartItemMapper.selectByExample(example);
         HashMap<String, String> map = new HashMap<>();
         for (OmsCartItem cartItem : omsCartItems) {
             map.put(cartItem.getProductSkuId(), JSON.toJSONString(cartItem));
@@ -57,6 +58,7 @@ public class CartServiceImpl implements CartService {
 
         //同步redis
         Jedis jedis = redisUtil.getJedis();
+        jedis.del("user:"+memberId+":cart");
         jedis.hmset("user:"+memberId+":cart",map);
 
         jedis.close();
@@ -71,7 +73,6 @@ public class CartServiceImpl implements CartService {
             String key = "user:"+userId+":cart";
             List<String> hvals = jedis.hvals(key);
             for (String hval : hvals) {
-                System.out.println(hval);
                 OmsCartItem omsCartItem = JSON.parseObject(hval, OmsCartItem.class);
                 omsCartItems.add(omsCartItem);
             }
@@ -86,4 +87,15 @@ public class CartServiceImpl implements CartService {
 
         return omsCartItems;
     }
+
+    @Override
+    public void checkCart(OmsCartItem omsCartItem) {
+        Example example = new Example(OmsCartItem.class);
+        example.createCriteria().andEqualTo("productSkuId",omsCartItem.getProductSkuId());
+        example.createCriteria().andEqualTo("memberId",omsCartItem.getMemberId());
+        omsCartItemMapper.updateByExampleSelective(omsCartItem,example);
+        //缓存同步
+        flushCartCache(omsCartItem.getMemberId());
+    }
+
 }
