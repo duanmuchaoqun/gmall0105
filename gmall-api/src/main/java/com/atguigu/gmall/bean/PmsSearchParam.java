@@ -9,7 +9,8 @@ public class PmsSearchParam implements Serializable{
 
     private String keyword;
 
-    private List<PmsSkuAttrValue> skuAttrValueList;
+    private String[] valueId;
+
 
     private Integer pageNum;
 
@@ -29,19 +30,19 @@ public class PmsSearchParam implements Serializable{
         this.keyword = keyword;
     }
 
-    public List<PmsSkuAttrValue> getSkuAttrValueList() {
-        return skuAttrValueList;
-    }
-
-    public void setSkuAttrValueList(List<PmsSkuAttrValue> skuAttrValueList) {
-        this.skuAttrValueList = skuAttrValueList;
-    }
-
     public Integer getPageNum() {
         return pageNum;
     }
 
     public void setPageNum(Integer pageNum) {
         this.pageNum = pageNum;
+    }
+
+    public String[] getValueId() {
+        return valueId;
+    }
+
+    public void setValueId(String[] valueId) {
+        this.valueId = valueId;
     }
 }

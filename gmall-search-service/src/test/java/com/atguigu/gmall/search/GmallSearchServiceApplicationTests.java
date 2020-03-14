@@ -3,6 +3,7 @@ package com.atguigu.gmall.search;
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.atguigu.gmall.bean.PmsSearchSkuInfo;
 import com.atguigu.gmall.bean.PmsSkuInfo;
+import com.atguigu.gmall.search.service.sync.ElasticSync;
 import com.atguigu.gmall.service.SkuService;
 import io.searchbox.client.JestClient;
 import io.searchbox.core.Index;
@@ -23,6 +24,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -104,6 +107,17 @@ public class GmallSearchServiceApplicationTests {
 			jestClient.execute(put);
 		}
 
+	}
+
+	//多线程同步测试
+	@Test
+	public void test(){
+		ExecutorService pool = Executors.newFixedThreadPool(10);
+
+		for (int i = 0; i < 100; i++) {
+			pool.execute(new ElasticSync(i));
+		}
+		pool.shutdown();
 	}
 
 }

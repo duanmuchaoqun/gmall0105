@@ -71,7 +71,7 @@ public class SearchServiceImpl implements SearchService {
      */
     private String getSearchDsl(PmsSearchParam pmsSearchParam) {
         //获取平台属性
-        List<PmsSkuAttrValue> skuAttrValueList = pmsSearchParam.getSkuAttrValueList();
+        String[] valueIds = pmsSearchParam.getValueId();
         //获取关键字
         String keyword = pmsSearchParam.getKeyword();
         //获取三级分类
@@ -93,9 +93,9 @@ public class SearchServiceImpl implements SearchService {
         }
 
         //filter 属性分类条件设置
-        if (skuAttrValueList != null) {
-            for (PmsSkuAttrValue pmsSkuAttrValue : skuAttrValueList) {
-                TermQueryBuilder termQueryBuilder = new TermQueryBuilder("skuAttrValueList.valueId", pmsSkuAttrValue.getValueId());
+        if (valueIds != null) {
+            for (String valueId : valueIds) {
+                TermQueryBuilder termQueryBuilder = new TermQueryBuilder("skuAttrValueList.valueId", valueId);
                 boolQueryBuilder.filter(termQueryBuilder);
             }
         }
@@ -111,7 +111,7 @@ public class SearchServiceImpl implements SearchService {
 
         // from
         if(pageNum == null || pageNum <= 0){
-            pageNum = 1;
+            pageNum = 0;
         }
         searchSourceBuilder.from(pageNum);
         // size
