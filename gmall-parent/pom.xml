@@ -94,6 +94,7 @@
                 <version>${jsoup.version}</version>
             </dependency>
 
+            <!--发送http请求的工具-->
             <!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient -->
             <dependency>
                 <groupId>org.apache.httpcomponents</groupId>
@@ -101,6 +102,7 @@
                 <version>${httpclient.version}</version>
             </dependency>
 
+            <!--java工具类-->
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-lang3</artifactId>
@@ -108,6 +110,7 @@
             </dependency>
 
 
+            <!--通用mapper-->
             <dependency>
                 <groupId>tk.mybatis</groupId>
                 <artifactId>mapper-spring-boot-starter</artifactId>

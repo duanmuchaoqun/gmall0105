@@ -2,6 +2,7 @@ package com.atguigu.gmall.cart.controller;
 
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.fastjson.JSON;
+import com.atguigu.gmall.annotations.LoginRequired;
 import com.atguigu.gmall.bean.OmsCartItem;
 import com.atguigu.gmall.bean.PmsSkuInfo;
 import com.atguigu.gmall.service.CartService;
@@ -28,9 +29,22 @@ public class CartController {
     @Reference
     CartService cartService;
 
+    @RequestMapping("/toTrade")
+    @LoginRequired(loginSuccess = true)
+    public String toTrade(HttpServletRequest request, HttpServletResponse response, ModelMap modelMap){
+
+        String memberId = (String)request.getAttribute("memberId");
+        String nickname = (String) request.getAttribute("nickname");
+
+        return "toTrade";
+    }
+
     @RequestMapping("/checkCart")
+    @LoginRequired(loginSuccess = false)
     public String checkCart(Integer isChecked,String skuId,HttpServletRequest request, HttpServletResponse response, ModelMap modelMap){
-        String memberId = "1";
+        String memberId = (String)request.getAttribute("memberId");
+        String nickname = (String) request.getAttribute("nickname");
+
         OmsCartItem omsCartItem = new OmsCartItem();
         omsCartItem.setMemberId(memberId);
         omsCartItem.setProductSkuId(skuId);
@@ -62,10 +76,12 @@ public class CartController {
     }
 
     @RequestMapping("/cartList")
+    @LoginRequired(loginSuccess = false)
     public String cartList(HttpServletRequest request, HttpServletResponse response, ModelMap modelMap){
 
         List<OmsCartItem> omsCartItems = new ArrayList<>();
-        String userId = "1";
+        String userId = (String)request.getAttribute("memberId");
+        String nickname = (String) request.getAttribute("nickname");
         if(StringUtils.isNotBlank(userId)){
             //已经登录的查询db
             omsCartItems = cartService.cartList(userId);
@@ -87,6 +103,7 @@ public class CartController {
     }
 
     @RequestMapping("/addToCart")
+    @LoginRequired(loginSuccess = false)
     public String addToCart(String skuId, int quantity, HttpServletRequest request, HttpServletResponse response){
 
         List<OmsCartItem> omsCartItems = new ArrayList<>();
@@ -110,7 +127,7 @@ public class CartController {
         omsCartItem.setQuantity(quantity);
 
         // 判断用户是否登录
-        String memberId="1";
+        String memberId="1";//request.getAttribute("memberId");
         if(StringUtils.isBlank(memberId)){
             // 没有登陆cookie
             //cookie里原有的购物车数据

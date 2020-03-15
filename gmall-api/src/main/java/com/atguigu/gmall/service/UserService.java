@@ -15,4 +15,8 @@ public interface UserService {
     void updateUser(UmsMember umsMember);
 
     void deleteUserById(Integer id);
+
+    UmsMember login(UmsMember umsMember);
+
+    void addUserToken(String token, String memberId);
 }
