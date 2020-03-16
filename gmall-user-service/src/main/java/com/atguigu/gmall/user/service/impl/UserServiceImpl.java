@@ -92,6 +92,16 @@ public class UserServiceImpl implements UserService {
         jedis.close();
     }
 
+    @Override
+    public void addOauthUser(UmsMember umsMember) {
+        userMapper.insertSelective(umsMember);
+    }
+
+    @Override
+    public UmsMember checkOathUser(UmsMember umsCheck) {
+        return userMapper.selectOne(umsCheck);
+    }
+
     /**
      * 数据库登录查询
      * @param umsMember
