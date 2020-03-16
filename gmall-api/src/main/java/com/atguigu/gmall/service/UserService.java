@@ -8,7 +8,7 @@ import java.util.List;
 public interface UserService {
     List<UmsMember> getAllUser();
 
-    List<UmsMemberReceiveAddress> getReceiveAddressByMemberId(Integer memberId);
+    List<UmsMemberReceiveAddress> getReceiveAddressByMemberId(String memberId);
 
     Integer saveUser(UmsMember umsMember);
 
@@ -20,7 +20,9 @@ public interface UserService {
 
     void addUserToken(String token, String memberId);
 
-    void addOauthUser(UmsMember umsMember);
+    UmsMember addOauthUser(UmsMember umsMember);
 
     UmsMember checkOathUser(UmsMember umsCheck);
+
+    UmsMemberReceiveAddress getReceiveAddressById(String receiveAddressId);
 }

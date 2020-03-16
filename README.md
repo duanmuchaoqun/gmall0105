@@ -20,3 +20,6 @@ gmall-cart-service 购物车服务后台 8074
 
 gmall-passport-web 用户认证中心 8085
 gmall-user-service 用户服务的service层 8070
+
+gmall-order-web 订单中心 8086
+gmall-order-service 订单服务 8076

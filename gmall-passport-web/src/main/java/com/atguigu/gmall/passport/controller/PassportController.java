@@ -76,11 +76,11 @@ public class PassportController {
             umsCheck.setSourceUid(umsMember.getSourceUid());
             UmsMember umsMemberCheck = userService.checkOathUser(umsCheck);
             if(umsMemberCheck==null){
-                userService.addOauthUser(umsMember);
+                umsMember = userService.addOauthUser(umsMember);
             } else {
                 umsMember = umsMemberCheck;
             }
-            String memberId = umsMember.getId();
+            String memberId = umsMember.getId();//rpc的主键返回策略失效
             String nickname = umsMember.getNickname();
             // 生成jwt的token，并且重定向到首页，携带该token
             token = makeToken(memberId, nickname, request);
@@ -119,7 +119,7 @@ public class PassportController {
         if (umsMemberLogin != null) {
             //登陆成功
             //获取token值
-            token = makeToken(umsMember.getId(), umsMember.getNickname(), request);
+            token = makeToken(umsMemberLogin.getId(), umsMemberLogin.getNickname(), request);
         } else {
             //登陆失败
             token = "fail";

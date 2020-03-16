@@ -33,66 +33,6 @@ public class UmsMember implements Serializable {
     private String accessToken;
     private String accessCode;
 
-    public String getGender() {
-        return gender;
-    }
-
-    public void setGender(String gender) {
-        this.gender = gender;
-    }
-
-    public String getSourceType() {
-        return sourceType;
-    }
-
-    public void setSourceType(String sourceType) {
-        this.sourceType = sourceType;
-    }
-
-    public String getSourceUid() {
-        return sourceUid;
-    }
-
-    public void setSourceUid(String sourceUid) {
-        this.sourceUid = sourceUid;
-    }
-
-    public void setStatus(Integer status) {
-        this.status = status;
-    }
-
-    public void setIntegration(Integer integration) {
-        this.integration = integration;
-    }
-
-    public void setGrowth(Integer growth) {
-        this.growth = growth;
-    }
-
-    public void setLuckeyCount(Integer luckeyCount) {
-        this.luckeyCount = luckeyCount;
-    }
-
-    public void setHistoryIntegration(Integer historyIntegration) {
-        this.historyIntegration = historyIntegration;
-    }
-
-    public String getAccessToken() {
-        return accessToken;
-    }
-
-    public void setAccessToken(String accessToken) {
-        this.accessToken = accessToken;
-    }
-
-    public String getAccessCode() {
-        return accessCode;
-    }
-
-    public void setAccessCode(String accessCode) {
-        this.accessCode = accessCode;
-    }
-
     public String getId() {
         return id;
     }
@@ -141,11 +81,11 @@ public class UmsMember implements Serializable {
         this.phone = phone;
     }
 
-    public int getStatus() {
+    public Integer getStatus() {
         return status;
     }
 
-    public void setStatus(int status) {
+    public void setStatus(Integer status) {
         this.status = status;
     }
 
@@ -163,6 +103,14 @@ public class UmsMember implements Serializable {
 
     public void setIcon(String icon) {
         this.icon = icon;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
     }
 
     public Date getBirthday() {
@@ -197,35 +145,67 @@ public class UmsMember implements Serializable {
         this.personalizedSignature = personalizedSignature;
     }
 
-    public int getIntegration() {
+    public String getSourceType() {
+        return sourceType;
+    }
+
+    public void setSourceType(String sourceType) {
+        this.sourceType = sourceType;
+    }
+
+    public Integer getIntegration() {
         return integration;
     }
 
-    public void setIntegration(int integration) {
+    public void setIntegration(Integer integration) {
         this.integration = integration;
     }
 
-    public int getGrowth() {
+    public Integer getGrowth() {
         return growth;
     }
 
-    public void setGrowth(int growth) {
+    public void setGrowth(Integer growth) {
         this.growth = growth;
     }
 
-    public int getLuckeyCount() {
+    public Integer getLuckeyCount() {
         return luckeyCount;
     }
 
-    public void setLuckeyCount(int luckeyCount) {
+    public void setLuckeyCount(Integer luckeyCount) {
         this.luckeyCount = luckeyCount;
     }
 
-    public int getHistoryIntegration() {
+    public Integer getHistoryIntegration() {
         return historyIntegration;
     }
 
-    public void setHistoryIntegration(int historyIntegration) {
+    public void setHistoryIntegration(Integer historyIntegration) {
         this.historyIntegration = historyIntegration;
+    }
+
+    public String getSourceUid() {
+        return sourceUid;
+    }
+
+    public void setSourceUid(String sourceUid) {
+        this.sourceUid = sourceUid;
+    }
+
+    public String getAccessToken() {
+        return accessToken;
+    }
+
+    public void setAccessToken(String accessToken) {
+        this.accessToken = accessToken;
+    }
+
+    public String getAccessCode() {
+        return accessCode;
+    }
+
+    public void setAccessCode(String accessCode) {
+        this.accessCode = accessCode;
     }
 }

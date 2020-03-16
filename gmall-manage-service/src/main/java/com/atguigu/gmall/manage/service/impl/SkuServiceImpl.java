@@ -3,10 +3,7 @@ package com.atguigu.gmall.manage.service.impl;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.atguigu.gmall.bean.PmsSkuAttrValue;
-import com.atguigu.gmall.bean.PmsSkuImage;
-import com.atguigu.gmall.bean.PmsSkuInfo;
-import com.atguigu.gmall.bean.PmsSkuSaleAttrValue;
+import com.atguigu.gmall.bean.*;
 import com.atguigu.gmall.manage.mapper.PmsSkuAttrValueMapper;
 import com.atguigu.gmall.manage.mapper.PmsSkuImageMapper;
 import com.atguigu.gmall.manage.mapper.PmsSkuInfoMapper;
@@ -18,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import redis.clients.jedis.Jedis;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -114,6 +112,26 @@ public class SkuServiceImpl implements SkuService {
         return pmsSkuInfos;
     }
 
+    /**
+     * 校验商品价格
+     * @param productSkuId
+     * @param productPrice
+     * @return
+     */
+    @Override
+    public boolean checkPrice(String productSkuId, BigDecimal productPrice) {
+        boolean b = false;
+        PmsSkuInfo pmsSkuInfo = new PmsSkuInfo();
+        pmsSkuInfo.setId(productSkuId);
+        PmsSkuInfo skuInfo = pmsSkuInfoMapper.selectOne(pmsSkuInfo);
+        BigDecimal price = skuInfo.getPrice();
+        if(price.compareTo(productPrice) == 0){
+            b = true;
+        }
+
+        return b;
+    }
+
 
     /**
      * 通过id获取SKU详情信息
@@ -136,7 +154,7 @@ public class SkuServiceImpl implements SkuService {
             String token = UUID.randomUUID().toString();
             String OK = jedis.set("sku:" + skuId + ":lock", token, "nx", "px", 10*1000);//拿到锁的线程有10秒的过期时间
             if (StringUtils.isNotBlank(OK) && OK.equals("OK")){
-                //设置成功，有权在10秒的国企时间内访问数据库
+                //设置成功，有权在10秒的过期时间内访问数据库
                 pmsSkuInfo = getSkuByIdFromDb(skuId);
 
                 if(pmsSkuInfo!=null){
