@@ -23,3 +23,5 @@ gmall-user-service 用户服务的service层 8070
 
 gmall-order-web 订单中心 8086
 gmall-order-service 订单服务 8076
+
+gmall-payment 支付 8087

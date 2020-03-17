@@ -10,4 +10,6 @@ public interface OrderService {
     String checkTradeCode(String memberId,String tradeCode);
 
     void save(OmsOrder omsOrder);
+
+    OmsOrder getOrderByOutTradeNo(String outTradeNo);
 }
