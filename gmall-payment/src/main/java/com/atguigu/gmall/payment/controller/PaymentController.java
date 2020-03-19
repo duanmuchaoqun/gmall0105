@@ -36,41 +36,16 @@ public class PaymentController {
     @Reference
     OrderService orderService;
 
-    @RequestMapping("/alipay/callback/return")
+    @RequestMapping("/index")
     @LoginRequired(loginSuccess = true)
-    public String aliPayCallBackReturn(HttpServletRequest request, ModelMap modelMap){
-        // 回调请求中获取支付宝参数
-
-        // 获取签名
-        String sign = request.getParameter("sign");
-        // 支付宝交易号
-        String trade_no = request.getParameter("trade_no");
-        // 获取订单号
-        String out_trade_no = request.getParameter("out_trade_no");
-        // 获取交易状态
-        String trade_status = request.getParameter("trade_status");
-        // 获取总金额
-        String total_amount = request.getParameter("total_amount");
-        String subject = request.getParameter("subject");
-        String callBackContent = request.getQueryString();
-
-        // 通过支付宝的paramsMap进行签名验证，2.0版本的接口将paramsMap参数去掉了，导致同步请求没发验签
-        if(StringUtils.isNotBlank(sign)){
-            // 验签成功
-            PaymentInfo paymentInfo = new PaymentInfo();
-            paymentInfo.setOrderSn(out_trade_no);//支付订单号
-            paymentInfo.setPaymentStatus("已支付");
-            paymentInfo.setAlipayTradeNo(trade_no);//支付宝的交易凭证号
-            paymentInfo.setCallbackContent(callBackContent);//回调请求字符串
-            paymentInfo.setCallbackTime(new Date());
-            // 更新用户的支付状态
-            paymentService.updatePayment(paymentInfo);
-        }
-
-        //支付成功后，引起的系统服务->订单服务的更新->库存服务->物流服务
-        return "finish";
+    public String index(String outTradeNo, BigDecimal totalAmount, HttpServletRequest request, ModelMap modelMap){
+        String memberId = (String)request.getAttribute("memberId");
+        String nickname = (String)request.getAttribute("nickname");
+        modelMap.put("nickName",nickname);
+        modelMap.put("outTradeNo",outTradeNo);
+        modelMap.put("totalAmount",totalAmount);
+        return "index";
     }
-
 
     @RequestMapping("/alipay/submit")
     @LoginRequired(loginSuccess = true)
@@ -109,18 +84,46 @@ public class PaymentController {
         paymentInfo.setSubject("测试支付机器");
         paymentInfo.setTotalAmount(totalAmount);
         paymentService.savePaymentInfo(paymentInfo);
+
+        //向消息中间件发送一个检查支付状态（支付服务消费）的延迟消息队列
+        paymentService.sendDelayPayResultCheckQueue(outTradeNo,5);
         // 返回并跳转支付宝支付页面
+
         return form;
     }
 
-    @RequestMapping("/index")
+    @RequestMapping("/alipay/callback/return")
     @LoginRequired(loginSuccess = true)
-    public String index(String outTradeNo, BigDecimal totalAmount, HttpServletRequest request, ModelMap modelMap){
-        String memberId = (String)request.getAttribute("memberId");
-        String nickname = (String)request.getAttribute("nickname");
-        modelMap.put("nickName",nickname);
-        modelMap.put("outTradeNo",outTradeNo);
-        modelMap.put("totalAmount",totalAmount);
-        return "index";
+    public String aliPayCallBackReturn(HttpServletRequest request, ModelMap modelMap){
+        // 回调请求中获取支付宝参数
+
+        // 获取签名
+        String sign = request.getParameter("sign");
+        // 支付宝交易号
+        String trade_no = request.getParameter("trade_no");
+        // 获取订单号
+        String outTradeNo = request.getParameter("out_trade_no");
+        // 获取交易状态
+        String trade_status = request.getParameter("trade_status");
+        // 获取总金额
+        String total_amount = request.getParameter("total_amount");
+        String subject = request.getParameter("subject");
+        String callBackContent = request.getQueryString();
+
+        // 通过支付宝的paramsMap进行签名验证，2.0版本的接口将paramsMap参数去掉了，导致同步请求没发验签
+        if(StringUtils.isNotBlank(sign)){
+            // 验签成功
+            PaymentInfo paymentInfo = new PaymentInfo();
+            paymentInfo.setOrderSn(outTradeNo);//支付订单号
+            paymentInfo.setPaymentStatus("已支付");
+            paymentInfo.setAlipayTradeNo(trade_no);//支付宝的交易凭证号
+            paymentInfo.setCallbackContent(callBackContent);//回调请求字符串
+            paymentInfo.setCallbackTime(new Date());
+            // 更新用户的支付状态
+            paymentService.updatePayment(paymentInfo);
+        }
+
+        //支付成功后，引起的系统服务->订单服务的更新->库存服务->物流服务
+        return "finish";
     }
 }
